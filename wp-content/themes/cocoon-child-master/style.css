@@ -1,0 +1,1295 @@
+@charset "UTF-8";
+
+/*!
+Theme Name: Cocoon Child
+Description: Cocoon専用の子テーマ
+Theme URI: https://wp-cocoon.com/
+Author: わいひら
+Author URI: https://nelog.jp/
+Template:   cocoon-master
+Version:    1.1.3
+*/
+
+/* ==========================================================
+   croco.blog カスタムCSS — 整理版 2026-10-12
+
+   目次（番号で検索できます）
+   01. 共通カラー
+   02. 記事本文の見出し H1〜H6
+   03. 記事内の目次（独自・Cocoon標準の両構造）
+   04. お問い合わせフォーム（Contact Form 7）
+   05. 本文・見出しの縮小と目次の1行表示
+   06. 記事タイトル（PCは2行、834px以下は行数制限なし）
+   07. モバイルヘッダー・検索・固定位置
+   08. 記事一覧タイトル・カテゴリーラベル
+   09. 右スライドメニュー（50vw・背景不透明度75%）
+   10. モバイルフッター（リンク2行・中央揃え）
+
+   管理上の注意
+   ・整理時は元CSSの実効値、セレクターの詳細度、!importantを維持。
+   ・追加調整：08の記事一覧タイトルを15px／14pxへ縮小。
+   ・同じ要素に異なる詳細度で指定するルールは意図的に残している。
+   ・同一セレクターでも基本装飾と最終調整を分け、内部順序を維持。
+   ・色変数への一括置換、@layer導入、開閉処理の追加は行っていない。
+   ・07〜10は原則1023px以下。600px・782pxの例外は各節内に記載。
+   ・復元用：style-original-backup.css。検証範囲は整理内容と確認事項.txt参照。
+========================================================== */
+
+/* 01. 共通カラー */
+
+:root {
+    --croco-orange: #D96B35;
+    --croco-orange-dark: #B95025;
+    --croco-orange-light: #FFF1E8;
+    --croco-orange-pale: #F5D6C4;
+    --croco-orange-soft: #E9A47C;
+
+    --croco-brown: #332820;
+    --croco-black: #000000;
+    --croco-white: #ffffff;
+}
+
+/* ==========================================================
+   02. 見出しデザイン（H1〜H6）
+   対象：記事本文内の見出し
+========================================================== */
+
+/* ----------------------------------------------------------
+   H1：オレンジ背景・白文字・角丸
+---------------------------------------------------------- */
+
+.entry-content h1 {
+    background: var(--croco-orange);
+    color: var(--croco-white);
+
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.5;
+
+    padding: 20px 24px;
+
+    border: none;
+    border-radius: 8px;
+}
+
+/* ----------------------------------------------------------
+   H2：薄いオレンジ背景＋左線
+---------------------------------------------------------- */
+
+.entry-content h2 {
+    background: var(--croco-orange-light);
+    color: var(--croco-brown);
+
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.5;
+
+    padding: 16px 20px;
+
+    border: none;
+    border-left: 6px solid var(--croco-orange);
+    border-radius: 6px;
+}
+
+/* ----------------------------------------------------------
+   H3：左側のオレンジ線
+---------------------------------------------------------- */
+
+.entry-content h3 {
+    background: transparent;
+    color: var(--croco-brown);
+
+    font-size: 23px;
+    font-weight: 700;
+    line-height: 1.5;
+
+    padding: 10px 16px;
+
+    border: none;
+    border-left: 4px solid var(--croco-orange);
+}
+
+/* ----------------------------------------------------------
+   H4：オレンジの下線
+---------------------------------------------------------- */
+
+.entry-content h4 {
+    background: transparent;
+    color: var(--croco-brown);
+
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.5;
+
+    padding: 8px 0;
+
+    border: none;
+    border-bottom: 2px solid var(--croco-orange);
+}
+
+/* ----------------------------------------------------------
+   H5：◆付きの黒文字見出し
+---------------------------------------------------------- */
+
+.entry-content h5 {
+    background: transparent;
+    color: var(--croco-black);
+
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.5;
+
+    padding: 6px 0;
+
+    border: none;
+}
+
+/* ◆を自動表示 */
+.entry-content h5::before {
+    content: "◆ ";
+
+    display: inline;
+    position: static;
+
+    color: var(--croco-black);
+    font-size: 0.85em;
+
+    width: auto;
+    height: auto;
+
+    background: none;
+    border-radius: 0;
+    transform: none;
+}
+
+/* ----------------------------------------------------------
+   H6：シンプルな黒文字
+---------------------------------------------------------- */
+
+.entry-content h6 {
+    background: transparent;
+    color: var(--croco-black);
+
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.5;
+
+    padding: 6px 0;
+
+    border: none;
+}
+
+/* ==========================================================
+   03. 目次デザイン
+   対象：Cocoonの自動生成目次
+========================================================== */
+
+/* ----------------------------------------------------------
+   03-1. 目次全体
+---------------------------------------------------------- */
+
+.entry-content .toc {
+    /* テーマのtable系表示による、長い目次での幅拡張を防止 */
+    display: block;
+    table-layout: fixed;
+    max-width: 100%;
+    min-width: 0;
+    background: var(--croco-orange-light);
+
+    border: 8px solid var(--croco-orange-light);
+    border-radius: 8px;
+
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ----------------------------------------------------------
+   03-2. 目次タイトル
+---------------------------------------------------------- */
+
+.entry-content .toc-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    background: var(--croco-orange-pale);
+    color: var(--croco-brown);
+
+    font-size: 20px;
+    font-weight: 700;
+
+    padding: 14px 20px;
+    margin: 0;
+}
+
+/* 表示・非表示ボタン */
+.entry-content .toc-title .toc-toggle {
+    background: var(--croco-white);
+    color: var(--croco-orange);
+
+    border-radius: 5px;
+
+    padding: 4px 10px;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* 目次本文 */
+.entry-content .toc-content {
+    background: var(--croco-white);
+    padding: 20px 24px;
+}
+
+/* ----------------------------------------------------------
+   03-3. H2：オレンジの丸数字
+---------------------------------------------------------- */
+
+/* リスト全体 */
+.entry-content .toc-list,
+.entry-content .toc-list ul,
+.entry-content .toc-list ol {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+/* H2の番号カウンター */
+.entry-content .toc-list {
+    counter-reset: toc-number;
+}
+
+/* H2の各項目 */
+.entry-content .toc-list > li {
+    margin: 0 0 18px;
+    counter-increment: toc-number;
+}
+
+/* H2の文字 */
+.entry-content .toc-list > li > a {
+    color: var(--croco-orange);
+
+    font-size: 18px;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+/* H2の丸数字 */
+.entry-content .toc-list > li > a::before {
+    content: counter(toc-number);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+
+    margin-right: 12px;
+
+    background: var(--croco-orange);
+    color: var(--croco-white);
+
+    border-radius: 50%;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    vertical-align: middle;
+}
+
+/* ----------------------------------------------------------
+   03-4. H3：右にインデント＋▶
+---------------------------------------------------------- */
+
+/* 子見出しのリスト */
+.entry-content .toc .toc-list > li > ul,
+.entry-content .toc .toc-list > li > ol {
+    margin: 12px 0 0 42px;
+    padding-left: 0;
+
+    list-style: none;
+}
+
+/* 子見出しの項目 */
+.entry-content .toc .toc-list > li > ul > li,
+.entry-content .toc .toc-list > li > ol > li {
+    margin-bottom: 10px;
+
+    list-style: none;
+}
+
+/* 子見出しの文字 */
+.entry-content .toc .toc-list > li > ul > li > a,
+.entry-content .toc .toc-list > li > ol > li > a {
+    color: var(--croco-brown);
+
+    font-size: 16px;
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+/* 子見出しの▶マーク */
+.entry-content .toc .toc-list > li > ul > li > a::before,
+.entry-content .toc .toc-list > li > ol > li > a::before {
+    content: "▶";
+
+    display: inline;
+    position: static;
+
+    color: var(--croco-orange-soft);
+
+    background: none;
+    border: none;
+    border-radius: 0;
+
+    width: auto;
+    height: auto;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    margin-right: 12px;
+
+    transform: none;
+}
+
+/* ----------------------------------------------------------
+   03-5. Cocoon標準の目次構造にも対応
+   ※ .toc-list が存在しない場合に適用
+---------------------------------------------------------- */
+
+/* 標準リスト */
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ol,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ul {
+    counter-reset: croco-toc;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* H2 */
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li {
+    counter-increment: croco-toc;
+    margin-bottom: 18px;
+    list-style: none;
+}
+
+/* H2の文字 */
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > a,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > a {
+    color: var(--croco-orange);
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+/* H2の丸数字 */
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > a::before,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > a::before {
+    content: counter(croco-toc);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+
+    margin-right: 12px;
+
+    background: var(--croco-orange);
+    color: var(--croco-white);
+
+    border-radius: 50%;
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* H3のリスト */
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > ol,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > ul,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > ol,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > ul {
+    margin: 12px 0 0 42px;
+    padding-left: 0;
+    list-style: none;
+}
+
+/* H3の文字 */
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > ol > li > a,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > ul > li > a,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > ol > li > a,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > ul > li > a {
+    color: var(--croco-brown);
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* H3の▶マーク */
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > ol > li > a::before,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > ul > li > a::before,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > ol > li > a::before,
+.entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > ul > li > a::before {
+    content: "▶";
+
+    display: inline;
+
+    color: var(--croco-orange-soft);
+    background: none;
+
+    width: auto;
+    height: auto;
+
+    border: none;
+    border-radius: 0;
+
+    font-size: 12px;
+
+    margin-right: 12px;
+}
+
+/* ----------------------------------------------------------
+   03-6. マウスホバー
+---------------------------------------------------------- */
+
+.entry-content .toc a:hover {
+    color: var(--croco-orange-dark);
+    text-decoration: underline;
+}
+
+/* ==========================================================
+   04. お問い合わせフォーム
+   対象：Contact Form 7
+========================================================== */
+
+/* ----------------------------------------------------------
+   04-1. 送信ボタン
+---------------------------------------------------------- */
+
+.wpcf7 input.wpcf7-submit {
+    background-color: var(--croco-orange) !important;
+    color: var(--croco-white) !important;
+
+    border: none !important;
+    border-radius: 10px !important;
+
+    font-size: 18px !important;
+    font-weight: 700 !important;
+
+    padding: 18px 24px !important;
+    width: 100% !important;
+
+    cursor: pointer;
+}
+
+/* ----------------------------------------------------------
+   04-2. マウスホバー
+---------------------------------------------------------- */
+
+.wpcf7 input.wpcf7-submit:hover {
+    background-color: var(--croco-orange-dark) !important;
+    color: var(--croco-white) !important;
+}
+
+/* ==========================================================
+   05. レスポンシブ対応
+========================================================== */
+
+/* ----------------------------------------------------------
+   05-1. タブレット・スマートフォン
+   834px以下
+---------------------------------------------------------- */
+
+@media screen and (max-width: 834px) {
+
+    /* H1 */
+    .entry-content h1 {
+        font-size: 24px;
+        padding: 16px 18px;
+    }
+
+    /* H2 */
+    .entry-content h2 {
+        font-size: 22px;
+        padding: 14px 16px;
+    }
+
+    /* H3 */
+    .entry-content h3 {
+        font-size: 20px;
+    }
+
+    /* H4 */
+    .entry-content h4 {
+        font-size: 18px;
+    }
+
+    /* H5 */
+    .entry-content h5 {
+        font-size: 17px;
+    }
+
+    /* H6 */
+    .entry-content h6 {
+        font-size: 15px;
+    }
+
+    /* 目次タイトル */
+    .entry-content .toc-title {
+        font-size: 18px;
+        padding: 12px 14px;
+    }
+
+    /* 目次本文 */
+    .entry-content .toc-content {
+        padding: 16px 12px;
+    }
+
+    /* 目次 H2 */
+    .entry-content .toc-list > li > a {
+        font-size: 16px;
+    }
+
+    /* 目次 H2 丸数字 */
+    .entry-content .toc-list > li > a::before {
+        width: 25px;
+        height: 25px;
+        font-size: 14px;
+        margin-right: 8px;
+    }
+
+    /* 目次 H3 インデント */
+    .entry-content .toc .toc-list > li > ul,
+    .entry-content .toc .toc-list > li > ol {
+        margin-left: 25px;
+    }
+
+    /* 目次 H3 文字 */
+    .entry-content .toc .toc-list > li > ul > li > a,
+    .entry-content .toc .toc-list > li > ol > li > a {
+        font-size: 14px;
+    }
+
+    /* Cocoon標準目次 H2 */
+    .entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > a,
+    .entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > a {
+        font-size: 16px;
+    }
+
+    /* Cocoon標準目次 H2 丸数字 */
+    .entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > a::before,
+    .entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > a::before {
+        width: 25px;
+        height: 25px;
+        font-size: 14px;
+        margin-right: 8px;
+    }
+
+    /* Cocoon標準目次 H3 インデント */
+    .entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > ol,
+    .entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > ul,
+    .entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > ol,
+    .entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > ul {
+        margin-left: 25px;
+    }
+
+    /* Cocoon標準目次 H3 文字 */
+    .entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > ol > li > a,
+    .entry-content .toc:not(:has(.toc-list)) .toc-content > ol > li > ul > li > a,
+    .entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > ol > li > a,
+    .entry-content .toc:not(:has(.toc-list)) .toc-content > ul > li > ul > li > a {
+        font-size: 14px;
+    }
+
+}
+
+/* ----------------------------------------------------------
+   05-1b. モバイルの横幅制約
+   目次のnowrapがflex/gridの最小幅を押し広げないようにする。
+   ページ全体をoverflow:hiddenで隠すのではなく、内容の幅を制限。
+---------------------------------------------------------- */
+@media screen and (max-width: 1023px) {
+    #content, #content-in, #main, .main, .article, .entry-content {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .entry-content {
+        overflow-wrap: anywhere;
+    }
+
+    .entry-content .toc,
+    .entry-content .toc .toc-content,
+    .entry-content .toc .toc-list {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .entry-content .toc li {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .entry-content img,
+    .entry-content video,
+    .entry-content iframe {
+        max-width: 100%;
+    }
+
+    .entry-content pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    .entry-content table {
+        width: 100%;
+        max-width: 100%;
+        table-layout: fixed;
+    }
+
+    .entry-content th,
+    .entry-content td {
+        overflow-wrap: anywhere;
+    }
+}
+
+/* ----------------------------------------------------------
+   05-2. 記事本文の文字サイズ（1023px以下）
+   段落・リストは本文サイズを継承。明示的な文字サイズのブロックは維持。
+---------------------------------------------------------- */
+@media screen and (max-width: 1023px) {
+    .single .entry-content {
+        font-size: 16px;
+        line-height: 1.8;
+    }
+
+    .entry-content h1 { font-size: 24px; }
+    .entry-content h2 { font-size: 22px; }
+    .entry-content h3 { font-size: 20px; }
+    .entry-content h4 { font-size: 18px; }
+    .entry-content h5 { font-size: 17px; }
+    .entry-content h6 { font-size: 15px; }
+}
+
+@media screen and (max-width: 600px) {
+    .single .entry-content { font-size: 15px; }
+    .entry-content h1 { font-size: 22px; }
+    .entry-content h2 { font-size: 20px; }
+    .entry-content h3 { font-size: 18px; }
+    .entry-content h4 { font-size: 17px; }
+    .entry-content h5 { font-size: 16px; }
+}
+
+/* ----------------------------------------------------------
+   05-3. 目次：通常は1行、長い文字列は末尾を「…」で省略
+   全文を自動縮小する方式ではない。リンク先・元の文字列は保持。
+   キーボードフォーカス時は全文を表示する。
+   .toc-listあり／なしの両構造に適用。
+---------------------------------------------------------- */
+.entry-content .toc .toc-content a {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.entry-content .toc .toc-content a:focus {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+@media screen and (max-width: 1023px) {
+    .entry-content .toc .toc-title {
+        font-size: 16px;
+        padding: 10px 12px;
+    }
+
+    .entry-content .toc .toc-content { padding: 14px 10px; }
+
+    /* 既存の構造別サイズ指定より確実に優先させる */
+    .entry-content .toc .toc-content a {
+        font-size: 14px !important;
+        line-height: 1.7;
+    }
+
+    .entry-content .toc .toc-content li li a {
+        font-size: 13px !important;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .entry-content .toc .toc-content a { font-size: 13px !important; }
+    .entry-content .toc .toc-content li li a { font-size: 12px !important; }
+}
+
+/* ==========================================================
+   06. 記事タイトルのデザイン
+========================================================== */
+
+/* 06-1. PC：記事タイトルは最大2行 */
+.single .entry-title {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: -0.02em;
+
+    /* 最大2行に制限 */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+
+    /* 長い文字列の折り返し */
+    overflow-wrap: anywhere;
+}
+
+/* 06-2. モバイル・タブレット：自然に改行 */
+@media screen and (max-width: 1023px) {
+    .single .entry-title {
+        font-size: 20px;
+        line-height: 1.5;
+        letter-spacing: 0;
+
+        /* 行数制限を解除 */
+        display: block;
+        -webkit-line-clamp: unset;
+        line-clamp: unset;
+        overflow: visible;
+
+        overflow-wrap: anywhere;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .single .entry-title { font-size: 18px; }
+}
+
+/* ==========================================================
+   07. モバイルヘッダー・検索・固定位置
+   ロゴ → 検索44px → メニュー60px。ロゴ上限は200×48px。
+   旧600px以下の190×42pxは後続指定で無効だったため削除。
+   検索の開閉はCocoon標準機能に依存する。
+   固定位置はtop:0、本文余白60px、z-index:9999を維持。
+   管理バーあり：通常32px、782px以下46px下げる。
+   汎用.menu-button指定は対象範囲と詳細度を変えず残す。
+========================================================== */
+@media screen and (max-width: 1023px) {
+
+    /* ヘッダー全体 */
+    .mobile-header-menu-buttons {
+        display: flex !important;
+        align-items: center !important;
+        background-color: #d97757 !important;
+    }
+
+    /* ロゴ：左側 */
+    .mobile-header-menu-buttons .logo-menu-button {
+        order: 0 !important;
+        flex: 1 1 auto !important;
+        width: auto !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding-left: 12px !important;
+        text-align: left !important;
+    }
+
+    /* ロゴ画像 */
+    .mobile-header-menu-buttons .logo-menu-button img {
+        display: block !important;
+        width: auto !important;
+        max-width: 220px !important;
+        max-height: 48px !important;
+        object-fit: contain;
+    }
+
+    /* メニュー：右側 */
+    .mobile-header-menu-buttons .menu-button {
+        order: 1 !important;
+        flex: 0 0 65px !important;
+        width: 65px !important;
+        margin: 0 0 0 auto !important;
+        color: #ffffff !important;
+    }
+
+    /* ヘッダー全体 */
+    ul.mobile-header-menu-buttons {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        background-color: #d97757 !important;
+        padding: 0 12px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* ロゴを左側に配置 */
+    ul.mobile-header-menu-buttons > li.logo-menu-button {
+        order: 1 !important;
+        flex: 1 1 auto !important;
+        width: auto !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* ロゴ画像 */
+    ul.mobile-header-menu-buttons > li.logo-menu-button img {
+        display: block !important;
+        width: auto !important;
+        object-fit: contain !important;
+    }
+
+    /* メニューボタンを右側に配置 */
+    ul.mobile-header-menu-buttons > li.navi-menu-button {
+        margin: 0 0 0 auto !important;
+        padding: 0 !important;
+        color: #ffffff !important;
+    }
+
+    /* メニューのアイコン・文字を白色 */
+    ul.mobile-header-menu-buttons > li.navi-menu-button,
+    ul.mobile-header-menu-buttons > li.navi-menu-button a {
+        color: #ffffff !important;
+    }
+
+    /* ロゴを左端に寄せる */
+    ul.mobile-header-menu-buttons > li.logo-menu-button {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+
+    /* ロゴ内のリンクも左寄せ */
+    ul.mobile-header-menu-buttons > li.logo-menu-button a {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        width: auto !important;
+        margin: 0 !important;
+    }
+
+    /* ロゴ画像 */
+    ul.mobile-header-menu-buttons > li.logo-menu-button img {
+        margin: 0 !important;
+        max-width: 200px !important;
+        max-height: 48px !important;
+    }
+
+    /* 検索ボタンを表示 */
+    ul.mobile-header-menu-buttons > li.search-menu-button {
+        display: flex !important;
+        order: 2 !important;
+        flex: 0 0 44px !important;
+        width: 44px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: #ffffff !important;
+    }
+
+    /* 検索アイコンを白色に */
+    ul.mobile-header-menu-buttons > li.search-menu-button a,
+    ul.mobile-header-menu-buttons > li.search-menu-button .fa {
+        color: #ffffff !important;
+    }
+
+    /* ハンバーガーメニューを検索の右側に */
+    ul.mobile-header-menu-buttons > li.navi-menu-button {
+        order: 3 !important;
+        flex: 0 0 60px !important;
+        width: 60px !important;
+        margin-left: 0 !important;
+    }
+    ul.mobile-header-menu-buttons {
+        position: fixed !important;
+        /* ulの余白・自身の移動指定による位置ずれを防ぐ */
+        margin: 0 !important;
+        transform: none !important;
+        height: 60px !important;
+        min-height: 60px !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        z-index: 9999 !important;
+        background: #d97757 !important;
+    }
+
+    /* 目次リンクで移動した見出しが固定ヘッダーに隠れない余白 */
+    html {
+        scroll-padding-top: 76px;
+    }
+
+    html:has(body.admin-bar #wpadminbar) {
+        scroll-padding-top: 108px;
+    }
+
+    /* 固定ヘッダーで本文が隠れないようにする */
+    body {
+        padding-top: 60px !important;
+    }
+
+    /* 管理バーが実際に存在するときだけ下げる。プレビュー内の空白を防ぐ */
+    body.admin-bar:has(#wpadminbar) ul.mobile-header-menu-buttons {
+        top: 32px !important;
+    }
+}
+
+@media screen and (max-width: 782px) {
+    html:has(body.admin-bar #wpadminbar) {
+        scroll-padding-top: 122px;
+    }
+
+    /* 小画面でも管理バーの46pxとヘッダーのオフセットを一致させる */
+    #wpadminbar {
+        position: fixed !important;
+        top: 0 !important;
+    }
+
+    body.admin-bar:has(#wpadminbar) ul.mobile-header-menu-buttons {
+        top: 46px !important;
+    }
+}
+
+/* カスタマイザーのプレビュー内では管理バー分を空けない */
+@media screen and (max-width: 1023px) {
+    body.customize-preview ul.mobile-header-menu-buttons,
+    body.admin-bar.customize-preview:has(#wpadminbar) ul.mobile-header-menu-buttons {
+        top: 0 !important;
+    }
+
+    html:has(body.customize-preview) {
+        scroll-padding-top: 76px;
+    }
+}
+
+/* ==========================================================
+   08. 記事一覧タイトル・カテゴリーラベル
+   1023px以下で15px、600px以下で14px。カテゴリーの背景は不透明度65%。
+========================================================== */
+@media screen and (max-width: 1023px) {
+
+    /* 記事一覧のタイトル */
+    .entry-card-title {
+        font-size: 15px !important;
+        line-height: 1.4 !important;
+    }
+
+    /* カテゴリーラベルを半透明 */
+    .cat-label {
+        background-color: rgba(217, 119, 87, 0.65) !important;
+        color: #ffffff !important;
+        font-size: 10px !important;
+        padding: 2px 5px !important;
+    }
+}
+
+@media screen and (max-width: 600px) {
+
+    /* 記事一覧タイトル */
+    .entry-card-title {
+        font-size: 14px !important;
+        line-height: 1.35 !important;
+    }
+}
+
+/* ==========================================================
+   09. 右スライドメニュー
+   右側配置・幅50vw、背景rgba(255,250,247,0.75)、ぼかし3px。
+   閉じた位置のtransformは非!importantを維持。開く処理は親テーマに依存。
+   class指定とID指定は詳細度が異なるため安易に統合しない。
+   ul.menu-drawerの背景色指定は現在ページの装飾にも影響するため保持。
+========================================================== */
+@media screen and (max-width: 1023px) {
+
+    /* スライドメニューを右側に配置 */
+    .navi-menu-content {
+        left: auto !important;
+        right: 0 !important;
+        transform: translateX(105%);
+    }
+
+    /* メニュー内の文字 */
+    .navi-menu-content .menu-drawer a {
+        color: #332820 !important;
+        font-size: 15px !important;
+    }
+
+    /* メニュー項目のホバー */
+    .navi-menu-content .menu-drawer a:hover {
+        background-color: #FFF1E8 !important;
+        color: #d97757 !important;
+    }
+
+    /* メニュー全体の背景 */
+    .navi-menu-content {
+        background-color: #ffffff !important;
+    }
+
+    /* メニュー項目の文字色 */
+    .navi-menu-content .menu-drawer li a,
+    .navi-menu-content .menu-drawer a {
+        color: #333333 !important;
+        background-color: transparent !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* マウスを当てたとき */
+    .navi-menu-content .menu-drawer li a:hover,
+    .navi-menu-content .menu-drawer a:hover {
+        color: #d97757 !important;
+        background-color: #fff0e9 !important;
+    }
+
+    /* メニュー内の文字色 */
+    #navi-menu-content ul.menu-drawer > li > a {
+        color: #333333 !important;
+        background-color: transparent !important;
+    }
+
+    /* ホバー時 */
+    #navi-menu-content ul.menu-drawer > li > a:hover {
+        color: #d97757 !important;
+        background-color: #fff0e9 !important;
+    }
+
+    /* 現在表示中のページ */
+    #navi-menu-content ul.menu-drawer > li.current-menu-item > a {
+        color: #d97757 !important;
+    }
+
+    /* メニュー全体 */
+    #navi-menu-content {
+        box-sizing: border-box !important;
+        overflow-y: auto !important;
+    }
+
+    /* メニュー見出し */
+    #navi-menu-content::before {
+        content: "MENU";
+        display: block;
+        color: #d97757;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        border-bottom: 2px solid #d97757;
+    }
+
+    /* メニューリスト */
+    #navi-menu-content .menu-drawer {
+        margin: 0 !important;
+        padding: 0 !important;
+        list-style: none !important;
+    }
+
+    /* メニュー項目 */
+    #navi-menu-content .menu-drawer > li {
+        margin: 0 !important;
+        padding: 0 !important;
+        border-bottom: 1px solid #f0e5df;
+    }
+
+    /* リンクのデザイン */
+    #navi-menu-content .menu-drawer > li > a {
+        display: flex !important;
+        align-items: center !important;
+        color: #333333 !important;
+        background: transparent !important;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    /* メニュー項目の先頭マーク */
+    #navi-menu-content .menu-drawer > li > a::before {
+        content: "›";
+        color: #d97757;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    /* ホバー・タップ時 */
+    #navi-menu-content .menu-drawer > li > a:hover {
+        background: #fff0e9 !important;
+        color: #d97757 !important;
+    }
+
+    /* 現在のページ */
+    #navi-menu-content .menu-drawer > li.current-menu-item > a {
+        background: #fff0e9 !important;
+        color: #d97757 !important;
+        font-weight: 600;
+    }
+
+    /* 閉じるボタン */
+    #navi-menu-content .navi-menu-close-button {
+        position: absolute;
+        color: #d97757 !important;
+        font-size: 22px;
+    }
+
+    /* 幅・背景透過・最終余白 */
+    #navi-menu-content {
+        width: 50vw !important;
+        max-width: none !important;
+        left: auto !important;
+        right: 0 !important;
+        background: rgba(255, 250, 247, 0.75) !important;
+        -webkit-backdrop-filter: blur(3px) !important;
+        backdrop-filter: blur(3px) !important;
+        padding: 65px 12px 24px !important;
+        box-shadow: -4px 0 16px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    /* MENU見出し */
+    #navi-menu-content::before {
+        font-size: 12px !important;
+        padding: 0 6px 12px !important;
+        margin-bottom: 8px !important;
+    }
+
+    /* メニュー文字 */
+    #navi-menu-content .menu-drawer > li > a {
+        font-size: 13px !important;
+        min-height: 48px !important;
+        padding: 10px 6px !important;
+        line-height: 1.5 !important;
+    }
+
+    /* 先頭の矢印 */
+    #navi-menu-content .menu-drawer > li > a::before {
+        font-size: 18px !important;
+        margin-right: 8px !important;
+        flex-shrink: 0;
+    }
+
+    /* 閉じるボタン */
+    #navi-menu-content .navi-menu-close-button {
+        top: 12px !important;
+        right: 12px !important;
+    }
+}
+
+/* ==========================================================
+   10. モバイルフッター：リンク2行・中央揃え
+   1行目：運営者プロフィール │ お問い合わせ
+   2行目：プライバシーポリシー＆免責事項（中央揃え）
+   /profile/ と /contact/ を含むリンクで順序を判定する。
+   それ以外の項目はすべて2行目用の全幅ルール対象。3項目の構成を想定。
+   :has()を使用。リンク12px、コピーライト11px、ロゴ非表示。
+========================================================== */
+@media screen and (max-width: 1023px) {
+
+    /* フッター全体 */
+    #footer {
+        background: #d97757 !important;
+        padding: 12px 10px 14px !important;
+        text-align: center !important;
+    }
+
+    /* ロゴ・アイコンを非表示 */
+    #footer .footer-bottom-logo,
+    #footer .footer-logo,
+    #footer .logo-footer {
+        display: none !important;
+    }
+
+    /* フッター内部の余白を縮小 */
+    #footer .footer-in,
+    #footer .footer-bottom,
+    #footer .footer-bottom-content {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        min-height: 0 !important;
+    }
+
+    /* メニュー全体 */
+    #footer .navi-footer-in > ul {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 2px 0 !important;
+        padding: 0 !important;
+        margin: 0 auto 8px !important;
+        list-style: none !important;
+    }
+
+    /* メニュー項目共通 */
+    #footer .navi-footer-in > ul > li {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+
+    /* 運営者プロフィール：1行目左 */
+    #footer .navi-footer-in > ul > li:has(a[href*="/profile/"]) {
+        order: 1 !important;
+        border-right: 1px solid rgba(255,255,255,0.65) !important;
+    }
+
+    /* お問い合わせ：1行目右 */
+    #footer .navi-footer-in > ul > li:has(a[href*="/contact/"]) {
+        order: 2 !important;
+    }
+
+    /* プライバシーポリシー：2行目中央 */
+    #footer .navi-footer-in > ul > li:not( :has(a[href*="/profile/"]) ):not( :has(a[href*="/contact/"]) ) {
+        order: 3 !important;
+        flex: 0 0 100% !important;
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
+    /* 2行目のリンク自体も中央揃え */
+    #footer .navi-footer-in > ul > li:not( :has(a[href*="/profile/"]) ):not( :has(a[href*="/contact/"]) ) > a {
+        display: inline-block !important;
+        width: auto !important;
+        text-align: center !important;
+    }
+
+    /* リンク文字 */
+    #footer .navi-footer-in > ul > li > a {
+        display: inline-block !important;
+        width: auto !important;
+        padding: 4px 10px !important;
+        color: #ffffff !important;
+        font-size: 12px !important;
+        font-weight: 400 !important;
+        line-height: 1.5 !important;
+        text-decoration: none !important;
+    }
+
+    /* コピーライト */
+    #footer .copyright {
+        color: #ffffff !important;
+        font-size: 11px !important;
+        line-height: 1.4 !important;
+        margin: 6px 0 0 !important;
+        padding: 0 !important;
+    }
+}
