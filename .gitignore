@@ -1,0 +1,11 @@
+.DS_Store
+*.log
+.env
+.env.*
+wp-config.php
+*.sqlite
+*.sqlite-*
+croco-private/backup-snapshots/
+croco-private/backup-run-report.txt
+wp-content/uploads/
+wp-content/database/
