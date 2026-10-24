@@ -11,3 +11,7 @@ croco.blog（WordPress）の自作部分だけを管理する。WordPress本体�
 - 配布物のテーマ・プラグイン（cocoon-master、akismet、contact-form-7 など。管理画面から入れ直せる）
 - `wp-content/uploads/`（画像）、`wp-content/database/`、`*.sqlite`（記事・コメントのデータ）
 - バックアップのスナップショットと実行レポート
+
+## サーバーへの反映
+GitHubの Actions →「ロリポップに反映」→ Run workflow。最初は dry_run にチェックを入れたまま実行して差分を確認し、問題なければ外して main から実行する。子テーマと croco-private だけを送り、サーバーにしかないファイル（WordPress本体・画像・データベース・スナップショット）は消さない。
+必要なSecrets（Settings → Secrets and variables → Actions）: `FTP_SERVER` / `FTP_USERNAME` / `FTP_PASSWORD`（SENDAIPLUSと同じ値）

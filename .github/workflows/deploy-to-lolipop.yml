@@ -1,0 +1,108 @@
+# GitHubの自作部分をロリポップに反映する
+#   wp-content/themes/cocoon-child-master/ → /croco.blog/wp-content/themes/cocoon-child-master
+#   croco-private/                         → /croco-private（公開フォルダの外）
+# dry_run=true（初期値）: サーバーとの差分を表示するだけで、何も送らない
+# dry_run=false: 差分のあるファイルをアップロードする（サーバーにしかないファイルは消さない）。main からだけ実行できる
+# WordPress本体・プラグイン・画像・データベース・バックアップのスナップショットには触らない
+# 必要なSecrets: FTP_SERVER / FTP_USERNAME / FTP_PASSWORD（SENDAIPLUSリポジトリと同じ値）
+name: ロリポップに反映
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: true=差分を見るだけ / false=実際にアップロード
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      # 「GitHubのフォルダ:サーバーのフォルダ」を1行ずつ
+      PAIRS: |
+        wp-content/themes/cocoon-child-master:/croco.blog/wp-content/themes/cocoon-child-master
+        croco-private:/croco-private
+      EXCLUDES: >-
+        --exclude '(^|/)(backup-snapshots|cache)/'
+        --exclude '(^|/)(backup-run-report\.txt|[^/]*\.sqlite[^/]*|wp-config\.php|\.DS_Store)$'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Secretsが登録されているか確認
+        run: |
+          if [ -z "$FTP_SERVER" ] || [ -z "$FTP_USERNAME" ] || [ -z "$FTP_PASSWORD" ]; then
+            echo "FTP_SERVER / FTP_USERNAME / FTP_PASSWORD をこのリポジトリの Secrets に登録してください"
+            exit 1
+          fi
+
+      - name: main以外からのアップロードを止める
+        if: inputs.dry_run == false && github.ref != 'refs/heads/main'
+        run: |
+          echo "アップロードは main からだけ実行できます（今: ${{ github.ref_name }}）"
+          exit 1
+
+      - name: lftpを入れる
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      - name: サーバーの今の中身を取得して差分を表示
+        run: |
+          # 中身は出さず、ファイル名だけ表示する。送るのは追加・変更のあったファイルだけ（upload/ に集める）
+          total_added=0; total_changed=0; total_only=0
+          while IFS=: read -r src dst; do
+            [ -n "$src" ] || continue
+            rm -rf remote; mkdir -p remote "upload/$src"
+            lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" -e "
+              set ftp:ssl-force true;
+              set ftp:ssl-protect-data true;
+              set ssl:verify-certificate yes;
+              set net:max-retries 3;
+              mirror --parallel=8 $EXCLUDES $dst remote;
+              quit
+            "
+            echo "== $src → $dst"
+            while read -r f; do
+              if [ ! -e "remote/$f" ]; then echo "追加: $src/$f"; total_added=$((total_added+1))
+              elif ! cmp -s "$src/$f" "remote/$f"; then echo "変更: $src/$f"; total_changed=$((total_changed+1))
+              else continue; fi
+              mkdir -p "upload/$src/$(dirname "$f")"; cp -p "$src/$f" "upload/$src/$f"
+            done < <(cd "$src" && find . -type f ! -name '.DS_Store' ! -name 'backup-run-report.txt' ! -name '*.sqlite*' | sed 's|^\./||' | sort)
+            while read -r f; do
+              [ -e "$src/$f" ] || { echo "サーバーにだけある（消さない）: $dst/$f"; total_only=$((total_only+1)); }
+            done < <(cd remote && find . -type f | sed 's|^\./||' | sort)
+          done <<< "$PAIRS"
+          echo "----"
+          echo "追加 ${total_added}件 / 変更 ${total_changed}件 / サーバーにだけある ${total_only}件"
+          {
+            echo "### 反映先: croco.blog の子テーマ と /croco-private"
+            echo "追加 ${total_added}件 / 変更 ${total_changed}件 / サーバーにだけある ${total_only}件（消さない）"
+            if [ "${{ inputs.dry_run }}" = "true" ]; then echo "お試しモードなので何も送っていません。"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: アップロード
+        if: inputs.dry_run == false
+        run: |
+          # 追加・変更のあったファイルだけ送る。削除はしない（--delete を付けない）
+          while IFS=: read -r src dst; do
+            [ -n "$src" ] || continue
+            if [ -z "$(find "upload/$src" -type f)" ]; then echo "$src: 送るファイルはありません"; continue; fi
+            lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" -e "
+              set ftp:ssl-force true;
+              set ftp:ssl-protect-data true;
+              set ssl:verify-certificate yes;
+              set net:max-retries 3;
+              mirror -R --parallel=4 --verbose upload/$src $dst;
+              quit
+            "
+          done <<< "$PAIRS"
